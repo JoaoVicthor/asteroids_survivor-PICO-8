@@ -21,6 +21,7 @@ entity = {
            obj.cy2 < self.cy1 then
             return false
         end
+        sfx(2)
         return true
     end,
     draw_collision = function(self)
@@ -29,12 +30,6 @@ entity = {
 }
 
 player = entity:new({
-    x = 64,
-    y = 64,
-    a = 0.5,
-    angle = 1 / 360 * 25,
-    size = 4,
-    state = "stale",
 
     update = function(self)
         self.x+=self.vx
@@ -70,12 +65,12 @@ player = entity:new({
 
     draw = function(self)
         if self.state == "accel" then
-            line(self.x2, self.y2, self.x2 + cos(self.a) * 2, self.y2 + sin(self.a) * 2,-7)
-            line(self.x3, self.y3, self.x3 + cos(self.a) * 2, self.y3 + sin(self.a) * 2,-7)
+            line(self.x2, self.y2, self.x2 + cos(self.a) * 2, self.y2 + sin(self.a) * 2,0x9a)
+            line(self.x3, self.y3, self.x3 + cos(self.a) * 2, self.y3 + sin(self.a) * 2,0x9a)
         end
-        line(self.x2,self.y2,self.x3,self.y3, 5)
-        line(self.x,self.y,self.x2,self.y2, 6)
-        line(self.x3,self.y3,self.x,self.y, 6)
+        line(self.x2,self.y2,self.x3,self.y3, 0x55)
+        line(self.x,self.y,self.x2,self.y2, 0x67)
+        line(self.x3,self.y3,self.x,self.y, 0x67)
     end
 })
 
@@ -87,11 +82,11 @@ asteroid = {
         tbl.y = tbl.y or rnd(128)
         tbl.vx = tbl.vx or rnd(0.5) * rnd({-1,1})
         tbl.vy = tbl.vy or rnd(0.5) * rnd({-1,1})
-        tbl.col = rnd({6,7,13})
-        tbl.cx1 = tbl.x-(tbl.size-1)
-        tbl.cx2 = tbl.x+(tbl.size-1)
-        tbl.cy1 = tbl.y-(tbl.size-1)
-        tbl.cy2 = tbl.y+(tbl.size-1)
+        tbl.col = tbl.col or rnd({0x5e, 0x65, 0xd5})
+        tbl.cx1 = tbl.x-(tbl.size)
+        tbl.cx2 = tbl.x+(tbl.size)
+        tbl.cy1 = tbl.y-(tbl.size)
+        tbl.cy2 = tbl.y+(tbl.size)
         return tbl
     end,
 
@@ -111,20 +106,22 @@ asteroid = {
             self.y+=128+self.size
         end
 
-        self.cx1 = self.x-(self.size-1)
-        self.cx2 = self.x+(self.size-1)
-        self.cy1 = self.y-(self.size-1)
-        self.cy2 = self.y+(self.size-1)
+        self.cx1 = self.x-(self.size + 1)
+        self.cx2 = self.x+(self.size + 1)
+        self.cy1 = self.y-(self.size + 1)
+        self.cy2 = self.y+(self.size + 1)
 
     end,
 
     draw = function(self)
-        circ(self.x, self.y, self.size,self.col)
+        circfill(self.x, self.y, self.size+1,0)
+        circfill(self.x, self.y, self.size,self.col)
     end,
 
     collision = function (self, obj)
         collided = entity.collision(self,obj)
         if collided then
+            add(effects,explosion:new({x=self.x, y=self.y}))
             score+=1
             if self.size == 2 then
                 del(asteroids,self)
@@ -136,8 +133,9 @@ asteroid = {
                     size = self.size,
                     x = self.x,
                     y = self.y,
-                    vx = self.vx * rnd({-1, -0.5, 0.5, 1}),
-                    vy = self.vy * rnd({-1, -0.5, 0.5, 1})
+                    vx = self.vx * rnd({-1, -0.5, 0.5, 0.75}),
+                    vy = self.vy * rnd({-1, -0.5, 0.5, 0.75}),
+                    col = self.col
                 }))
             end
             del(bullets,obj)
@@ -156,16 +154,43 @@ bullet = {
     end,
 
     update = function(self)
-        self.x+=self.vx
-        self.y+=self.vy
+        if self.x < 0 or self.x > 128 or self.y < 0 or self.y > 128 then
+            del(bullets,self)
+        else
+            self.x+=self.vx
+            self.y+=self.vy
 
-        self.cx1 = self.x
-        self.cx2 = self.x
-        self.cy1 = self.y
-        self.cy2 = self.y
+            self.cx1 = self.x
+            self.cx2 = self.x
+            self.cy1 = self.y
+            self.cy2 = self.y
+        end
     end,
 
     draw = function(self)
         circfill(self.x,self.y,0,7)
+    end
+}
+
+explosion = {
+    new = function (self, tbl)
+        tbl = entity.new(self, tbl)
+        tbl.size = tbl.size or 2
+        tbl.life = 12
+        return tbl
+    end,
+
+    update = function (self)
+        if self.life > 0 then
+            self.life-=1
+        else
+            del(effects, self) 
+        end
+    end,
+
+    draw = function (self)
+        circfill(self.x, self.y, self.size+(self.life/4), 10)
+        circfill(self.x, self.y, self.size/2+(self.life/4), 9)
+        circfill(self.x, self.y, self.size/2+(self.life/4)-1, 8)
     end
 }
