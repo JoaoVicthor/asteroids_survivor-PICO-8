@@ -1,8 +1,14 @@
 function _init()
     palt(0,false) -- black as opaque
-    pal(14,128,1)
-    pal(11,129,1)
+    pal(2,-14,1)
+    pal(11,-15,1)
+    pal(14,-16,1)
 
+    background = {}
+    for i=1,48 do
+        add(background,star:new())
+    end
+    add(background,planet:new())
     player = player:new({
         x = 64,
         y = 64,
@@ -28,6 +34,7 @@ function _init()
 end
 
 function _update60()
+    foreach(background, obj_update)
     foreach(asteroids, function (ast)
         if player:collision(ast) then
             explosion:new({x=(player.x + player.x2 + player.x3) / 3, y=(player.y + player.y2 + player.y3) / 3, size = 1}):draw()
@@ -57,6 +64,7 @@ end
 
 function _draw()
     cls(11)
+    foreach(background, obj_draw)
     foreach(bullets, obj_draw)
     fillp(0b1110101010111011)
     foreach(asteroids, obj_draw)

@@ -194,3 +194,55 @@ explosion = {
         circfill(self.x, self.y, self.size/2+(self.life/4)-1, 8)
     end
 }
+
+star = {
+    new = function (self, tbl)
+        tbl = entity.new(self, tbl) 
+        tbl.x = rnd(128)
+        tbl.y = rnd(128)
+        tbl.v = rnd(0.01)
+        tbl.size = rnd({0,1})
+        tbl.col = rnd({0,3,13})
+        tbl.type = rnd({"square","circle"})
+        return tbl
+    end,
+
+    update = function (self)
+        self.x += self.v
+        if self.x > 128 + self.size then
+            self.x-=128+self.size
+        end
+    end,
+
+    draw = function (self)
+        if self.type == "square" then
+            rectfill(self.x, self.y,self.x+self.size,self.y+self.size,self.col)
+        elseif self.type == "circle" then
+            circfill(self.x, self.y, self.size, self.col)
+        end
+    end
+
+}
+
+planet = {
+    new = function (self, tbl)
+        tbl = entity.new(self, tbl) 
+        tbl.x = rnd({34 + rnd(8), 94 - rnd(8)})
+        tbl.y = rnd({34 + rnd(8), 94 - rnd(8)})
+        --tbl.v = rnd(0.01)
+        return tbl
+    end,
+
+    update = function (self)
+    end,
+
+    draw = function (self)
+        circfill(self.x, self.y, 33, 0)
+        circfill(self.x, self.y, 31, 14)
+        pal(2,-14,1)
+        circfill(self.x + 4, self.y-3, 27, 2)
+        fillp(0x0100010001000100)
+        circfill(self.x + 4, self.y-3, 26, 0xe2)
+    end
+
+}
