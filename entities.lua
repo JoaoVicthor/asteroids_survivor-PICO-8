@@ -64,6 +64,7 @@ player = entity:new({
     end,
 
     draw = function(self)
+        circfill((self.x + self.x2 + self.x3) / 3, (self.y + self.y2 + self.y3) / 3, self.size-3, 0x70)
         if self.state == "accel" then
             line(self.x2, self.y2, self.x2 + cos(self.a) * 2, self.y2 + sin(self.a) * 2,0x9a)
             line(self.x3, self.y3, self.x3 + cos(self.a) * 2, self.y3 + sin(self.a) * 2,0x9a)
@@ -82,7 +83,7 @@ asteroid = {
         tbl.y = tbl.y or rnd(128)
         tbl.vx = tbl.vx or rnd(0.5) * rnd({-1,1})
         tbl.vy = tbl.vy or rnd(0.5) * rnd({-1,1})
-        tbl.col = tbl.col or rnd({0x5e, 0x65, 0xd5})
+        tbl.col = tbl.col or rnd({0x5e, 0x45, 0xd5})
         tbl.cx1 = tbl.x-(tbl.size)
         tbl.cx2 = tbl.x+(tbl.size)
         tbl.cy1 = tbl.y-(tbl.size)
@@ -200,15 +201,15 @@ star = {
         tbl = entity.new(self, tbl) 
         tbl.x = rnd(128)
         tbl.y = rnd(128)
-        tbl.v = rnd(0.01)
+        tbl.v = 0.0075
         tbl.size = rnd({0,1})
-        tbl.col = rnd({0,3,13})
+        tbl.col = rnd({3,4,9,12})
         tbl.type = rnd({"square","circle"})
         return tbl
     end,
 
     update = function (self)
-        self.x += self.v
+        self.x += self.v * (self.size + 1)
         if self.x > 128 + self.size then
             self.x-=128+self.size
         end
@@ -239,7 +240,6 @@ planet = {
     draw = function (self)
         circfill(self.x, self.y, 33, 0)
         circfill(self.x, self.y, 31, 14)
-        pal(2,-14,1)
         circfill(self.x + 4, self.y-3, 27, 2)
         fillp(0x0100010001000100)
         circfill(self.x + 4, self.y-3, 26, 0xe2)

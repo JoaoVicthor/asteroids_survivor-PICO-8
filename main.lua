@@ -1,6 +1,7 @@
 function _init()
     palt(0,false) -- black as opaque
     pal(2,-14,1)
+    pal(4,-11,1)
     pal(11,-15,1)
     pal(14,-16,1)
 
@@ -19,7 +20,6 @@ function _init()
         size = 4,
         state = "stale",
     })
-    player:update()
 
     asteroids = {}
     for i=1,8 do
@@ -34,7 +34,13 @@ function _init()
 end
 
 function _update60()
+    input()
+    player:update()
     foreach(background, obj_update)
+    foreach(asteroids, obj_update)
+    foreach(bullets, obj_update)
+    foreach(effects,obj_update)
+
     foreach(asteroids, function (ast)
         if player:collision(ast) then
             explosion:new({x=(player.x + player.x2 + player.x3) / 3, y=(player.y + player.y2 + player.y3) / 3, size = 1}):draw()
@@ -42,6 +48,7 @@ function _update60()
             sfx(1,-2)
             sleep(2)
             _init()
+            player:update()
         end
         foreach(bullets, function (bul)
             ast:collision(bul)
@@ -54,12 +61,6 @@ function _update60()
     else
         frame+=1
     end
-
-    input()
-    player:update()
-    foreach(asteroids, obj_update)
-    foreach(bullets, obj_update)
-    foreach(effects,obj_update)
 end
 
 function _draw()
