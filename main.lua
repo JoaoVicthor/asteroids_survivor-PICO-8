@@ -1,4 +1,9 @@
 function _init()
+    scene = "menu"
+    _init_game()
+end
+
+function _init_game()
     palt(0,false) -- black as opaque
     pal(2,-14,1)
     pal(4,-11,1)
@@ -20,6 +25,7 @@ function _init()
         size = 4,
         state = "stale",
     })
+    player:calculate_verts()
 
     asteroids = {}
     for i=1,8 do
@@ -34,32 +40,38 @@ function _init()
 end
 
 function _update60()
-    input()
-    player:update()
-    foreach(background, obj_update)
-    foreach(asteroids, obj_update)
-    foreach(bullets, obj_update)
-    foreach(effects,obj_update)
+    if scene == "game" then
+        input()
+        player:update()
+        foreach(background, obj_update)
+        foreach(asteroids, obj_update)
+        foreach(bullets, obj_update)
+        foreach(effects,obj_update)
 
-    foreach(asteroids, function (ast)
-        if player:collision(ast) then
-            explosion:new({x=(player.x + player.x2 + player.x3) / 3, y=(player.y + player.y2 + player.y3) / 3, size = 1}):draw()
-            --sfx(3,-2)
-            sfx(1,-2)
-            sleep(2)
-            _init()
-            player:update()
+        for ast in all(asteroids) do
+            if player:collision(ast) then
+                explosion:new({x=(player.x + player.x2 + player.x3) / 3, y=(player.y + player.y2 + player.y3) / 3, size = 1}):draw()
+                --sfx(3,-2)
+                sfx(1,-2)
+                sleep(2)
+                _init_game()
+                break
+            end
+            foreach(bullets, function (bul)
+                ast:collision(bul)
+            end)
         end
-        foreach(bullets, function (bul)
-            ast:collision(bul)
-        end)
-    end)
 
-    if frame%300 == 0 then
-        add(asteroids, asteroid:new())
-        frame = 1
-    else
-        frame+=1
+        if frame%300 == 0 then
+            add(asteroids, asteroid:new())
+            frame = 1
+        else
+            frame+=1
+        end
+    elseif scene == "menu" then
+        if btn()>0 then
+            scene = "game"
+        end
     end
 end
 
@@ -71,7 +83,11 @@ function _draw()
     foreach(asteroids, obj_draw)
     fillp(0b0101010101010101)
     player:draw()
-    fillp(0b0000000000000000)
+    fillp()
     foreach(effects,obj_draw)
     print("score: "..score, 8,8,6)
+    if scene == "menu" then
+        rectfill(19,31, 110, 37, 0)
+        print("press any btn to start!", 20,32,7)
+    end
 end

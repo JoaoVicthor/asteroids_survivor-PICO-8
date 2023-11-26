@@ -19,7 +19,7 @@ function input()
         sfx(1,-2)
     end
 
-    if(btnp(4) and shoot_delay <= 0) then
+    if (btnp(4) or btnp(5)) and shoot_delay <= 0 then
         sfx(0)
         add(bullets, bullet:new())
         shoot_delay=20

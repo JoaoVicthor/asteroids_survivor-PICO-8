@@ -51,16 +51,7 @@ player = entity:new({
         elseif self.y < 0 - self.size then
             self.y+=128+self.size
         end
-
-        self.x2 = self.x + cos(self.a+self.angle) * self.size
-        self.y2 = self.y + sin(self.a+self.angle) * self.size
-        self.x3 = self.x + cos(self.a-self.angle) * self.size
-        self.y3 = self.y + sin(self.a-self.angle) * self.size
-
-        self.cx1 = min(self.x,min(self.x2,self.x3)) + 1
-        self.cx2 = max(self.x,max(self.x2,self.x3)) - 1
-        self.cy1 = min(self.y,min(self.y2,self.y3)) + 1
-        self.cy2 = max(self.y,max(self.y2,self.y3)) - 1
+        self:calculate_verts()
     end,
 
     draw = function(self)
@@ -72,6 +63,18 @@ player = entity:new({
         line(self.x2,self.y2,self.x3,self.y3, 0x55)
         line(self.x,self.y,self.x2,self.y2, 0x67)
         line(self.x3,self.y3,self.x,self.y, 0x67)
+    end,
+
+    calculate_verts = function(self)
+        self.x2 = self.x + cos(self.a+self.angle) * self.size
+        self.y2 = self.y + sin(self.a+self.angle) * self.size
+        self.x3 = self.x + cos(self.a-self.angle) * self.size
+        self.y3 = self.y + sin(self.a-self.angle) * self.size
+
+        self.cx1 = min(self.x,min(self.x2,self.x3)) + 1
+        self.cx2 = max(self.x,max(self.x2,self.x3)) - 1
+        self.cy1 = min(self.y,min(self.y2,self.y3)) + 1
+        self.cy2 = max(self.y,max(self.y2,self.y3)) - 1        
     end
 })
 
@@ -102,9 +105,9 @@ asteroid = {
         end
 
         if self.y > 128 + self.size then
-            self.y-=128+self.size
+            self.y-=128+self.size/2
         elseif self.y < 0 - self.size then
-            self.y+=128+self.size
+            self.y+=128+self.size/2
         end
 
         self.cx1 = self.x-(self.size + 1)
@@ -230,7 +233,7 @@ planet = {
         tbl = entity.new(self, tbl) 
         tbl.x = rnd({34 + rnd(8), 94 - rnd(8)})
         tbl.y = rnd({34 + rnd(8), 94 - rnd(8)})
-        --tbl.v = rnd(0.01)
+        tbl.col = rnd({{0x0e,0xe2},{0x0e,0xe4}})
         return tbl
     end,
 
@@ -238,11 +241,13 @@ planet = {
     end,
 
     draw = function (self)
+        local pattern = 0b0000111111110000
         circfill(self.x, self.y, 33, 0)
-        circfill(self.x, self.y, 31, 14)
-        circfill(self.x + 4, self.y-3, 27, 2)
-        fillp(0x0100010001000100)
-        circfill(self.x + 4, self.y-3, 26, 0xe2)
+        fillp(pattern)
+        circfill(self.x, self.y, 31, self.col[1])
+        circfill(self.x + 3, self.y-4, 27, self.col[2])
+        circfill(self.x + 3, self.y-4, 26, self.col[2])
+        fillp()
     end
 
 }
